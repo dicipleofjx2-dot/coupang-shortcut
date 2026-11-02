@@ -4,26 +4,56 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>쿠팡 바로가기</title>
+<script>
+  // 홈 화면 아이콘으로 열렸으면 바로 쿠팡파트너스 링크로 이동
+  const PARTNER_URL = 'https://link.coupang.com/a/ilcffS0Tcq';
+  if (new URLSearchParams(location.search).has('go') ||
+      navigator.standalone || matchMedia('(display-mode: standalone)').matches) {
+    location.replace(PARTNER_URL);
+  }
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#e52528">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="쿠팡">
 <style>
-  body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Malgun Gothic',sans-serif;background:#fff;color:#222;text-align:center;padding:16px}
+  body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Malgun Gothic',sans-serif;background:#fff;color:#222;text-align:center;padding:16px;box-sizing:border-box}
   button{border:0;background:none;cursor:pointer;padding:0}
   img{width:200px;height:200px;border-radius:24px}
   p{margin:0;font-size:15px;color:#555}
-  #guide{display:none;background:#f5f5f5;border-radius:12px;padding:12px 16px;font-size:14px;max-width:300px}
+  #guide{display:none;background:#fff4f4;border:2px solid #e52528;border-radius:12px;padding:14px 16px;font-size:16px;line-height:1.6;max-width:320px;text-align:left}
+  #guide b{color:#e52528}
 </style>
 </head>
 <body>
   <button id="install" aria-label="홈 화면에 쿠팡 아이콘 설치"><img src="icon-512.png" alt="쿠팡 쇼핑백"></button>
-  <p>아이콘을 누르면 홈 화면에 설치됩니다</p>
+  <p id="hint">아이콘을 누르면 홈 화면에 설치됩니다</p>
   <div id="guide"></div>
   <script>
     let deferred;
     const guide = document.getElementById('guide');
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    function showGuide() {
+      guide.style.display = 'block';
+      if (isIOS) {
+        guide.innerHTML = '아이폰은 아래 순서로 설치하세요.<br>' +
+          '1. 화면 아래(또는 위)의 <b>공유 버튼</b> □↑ 누르기<br>' +
+          '2. 목록을 내려 <b>"홈 화면에 추가"</b> 누르기<br>' +
+          '3. 오른쪽 위 <b>"추가"</b> 누르기';
+      } else {
+        guide.innerHTML = '브라우저 메뉴(⋮) → <b>"홈 화면에 추가"</b> 또는 <b>"앱 설치"</b>를 누르세요.';
+      }
+    }
+
+    if (isIOS) {
+      // 아이폰은 "홈 화면에 추가" 시 현재 주소를 저장하므로, 이동 표시(?go=1)를 붙여 둔다
+      history.replaceState(null, '', location.pathname + '?go=1');
+      document.getElementById('hint').textContent = '아이폰은 아래 방법으로 홈 화면에 추가하세요';
+      showGuide();
+    }
+
     window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
     document.getElementById('install').addEventListener('click', async () => {
       if (deferred) {
@@ -32,15 +62,7 @@
         deferred = null;
         return;
       }
-      const ua = navigator.userAgent;
-      guide.style.display = 'block';
-      if (matchMedia('(display-mode: standalone)').matches) {
-        guide.textContent = '이미 설치되어 있습니다.';
-      } else if (/iPhone|iPad|iPod/.test(ua)) {
-        guide.textContent = '하단 공유 버튼(□↑) → "홈 화면에 추가"를 누르세요.';
-      } else {
-        guide.textContent = '브라우저 메뉴(⋮) → "홈 화면에 추가" 또는 "앱 설치"를 누르세요.';
-      }
+      showGuide();
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
