@@ -38,10 +38,23 @@
     function showGuide() {
       guide.style.display = 'block';
       if (isIOS) {
-        guide.innerHTML = '아이폰은 아래 순서로 설치하세요.<br>' +
-          '1. 화면 아래(또는 위)의 <b>공유 버튼</b> □↑ 누르기<br>' +
+        const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|; wv\)/i.test(ua);
+        const otherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|Whale/i.test(ua);
+        let html = '';
+        if (inApp) {
+          html = '<b>지금은 앱 안의 브라우저라서 설치할 수 없어요.</b><br>' +
+            '오른쪽 위/아래 메뉴에서 <b>"Safari로 열기"</b>를 누른 뒤 다시 진행하세요.<br><br>';
+        } else if (otherBrowser) {
+          html = '<b>크롬 등 다른 브라우저에서는 설치가 안 돼요.</b><br>' +
+            '이 주소를 복사해서 <b>Safari</b>에서 여세요.<br><br>';
+        }
+        html += '아이폰(Safari)에서 설치하는 순서<br>' +
+          '1. 화면 아래 줄의 <b>공유 버튼</b> □↑ 누르기<br>' +
+          '&nbsp;&nbsp;&nbsp;(안 보이면 아래 줄 오른쪽 <b>⋯</b> 누르고 <b>"공유"</b> 선택)<br>' +
+          '&nbsp;&nbsp;&nbsp;(그래도 안 보이면 화면을 위로 살짝 쓸어올리거나 주소창을 한 번 누르기)<br>' +
           '2. 목록을 내려 <b>"홈 화면에 추가"</b> 누르기<br>' +
           '3. 오른쪽 위 <b>"추가"</b> 누르기';
+        guide.innerHTML = html;
       } else {
         guide.innerHTML = '브라우저 메뉴(⋮) → <b>"홈 화면에 추가"</b> 또는 <b>"앱 설치"</b>를 누르세요.';
       }
